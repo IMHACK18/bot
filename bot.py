@@ -8,23 +8,12 @@ AUTHORIZED_USER_ID = 6205215318
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# Load setup script
-with open("setup.sh", "r") as f:
-    SETUP_SCRIPT = f.read()
-
 @bot.message_handler(commands=['start'])
 def start(message):
     if message.from_user.id != AUTHORIZED_USER_ID:
         bot.reply_to(message, "🚫 Access denied.")
         return
-    bot.send_message(message.chat.id, "👋 Welcome to VPS Setup Bot!
-
-Commands:
-/start – Show this message
-/deploy – Run setup on default `vps_list.txt`
-/status – Show current deployment status
-
-Send a .txt or .zip file containing VPS credentials in `user@ip:password` format.")
+    bot.send_message(message.chat.id, "👋 Welcome to VPS Setup Bot!\n\nCommands:\n/start – Show this message\n/deploy – Run setup on default `vps_list.txt`\n/status – Show current deployment status\n\nSend a .txt or .zip file containing VPS credentials in `user@ip:password` format.")
 
 @bot.message_handler(commands=['deploy'])
 def deploy_command(message):
@@ -44,8 +33,7 @@ def status_command(message):
     if message.from_user.id != AUTHORIZED_USER_ID:
         bot.reply_to(message, "🚫 Access denied.")
         return
-    status = "✅ Bot is online.
-Waiting for your file or /deploy command."
+    status = "✅ Bot is online.\nWaiting for your file or /deploy command."
     bot.send_message(message.chat.id, status)
 
 @bot.message_handler(content_types=['document'])
@@ -92,7 +80,8 @@ def deploy_to_vps(ip, username, password):
 
     sftp = ssh.open_sftp()
     sftp_file = sftp.file('/root/setup.sh', 'w')
-    sftp_file.write(SETUP_SCRIPT)
+    with open("setup.sh", "r") as f:
+        sftp_file.write(f.read())
     sftp_file.chmod(0o755)
     sftp_file.close()
     sftp.close()
